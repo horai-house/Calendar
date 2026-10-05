@@ -6,7 +6,7 @@
   // --- 状態管理 ---
   const state = {
     currentYear: new Date().getFullYear(),
-    currentPeriod: 'first-half', // 'first-half' | 'second-half' | 'full-year'
+    currentPeriod: new Date().getMonth() + 1 <= 6 ? 'first-half' : 'second-half', // 現在月で自動判定
     activeMobileMonth: new Date().getMonth() + 1,
     events: {}, // { "YYYY-MM-DD": { text: "...", color: "..." } }
     monthTasks: {}, // { "1": [ { text: "...", done: false } ], ... }
@@ -48,7 +48,11 @@
   const fontSizeVal = document.getElementById('font-size-val');
   const resetPrintOptBtn = document.getElementById('reset-print-opt-btn');
 
-  // --- ストレージ操作 ---
+  // Firebase参照の取得
+  let unsubscribeEvents = null;
+  let unsubscribeTasks = null;
+
+  // --- ストレージ操作（LocalStorage ＋ Firebase Firestore同期） ---
   function loadYearEvents(year) {
     try {
       const data = localStorage.getItem(`${STORAGE_KEY_PREFIX}${year}`);
@@ -64,6 +68,13 @@
       localStorage.setItem(`${STORAGE_KEY_PREFIX}${year}`, JSON.stringify(events));
     } catch (e) {
       console.error('LocalStorage save error:', e);
+    }
+
+    // Firebase同期
+    if (window.db && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+      window.db.collection("events").doc(String(year)).set(events).catch(err => {
+        console.error("Firestore save events error:", err);
+      });
     }
   }
 
@@ -83,6 +94,46 @@
     } catch (e) {
       console.error('LocalStorage tasks save error:', e);
     }
+
+    // Firebase同期
+    if (window.db && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+      window.db.collection("tasks").doc(String(year)).set(tasks).catch(err => {
+        console.error("Firestore save tasks error:", err);
+      });
+    }
+  }
+
+  // --- Firebase リアルタイム受信登録 ---
+  function subscribeFirebase(year) {
+    if (!window.db || firebaseConfig.apiKey === "YOUR_API_KEY") return;
+
+    // 前の購読を解除
+    if (unsubscribeEvents) unsubscribeEvents();
+    if (unsubscribeTasks) unsubscribeTasks();
+
+    // 予定データのリアルタイム同期
+    unsubscribeEvents = window.db.collection("events").doc(String(year))
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          state.events = doc.data() || {};
+          saveYearEvents(year, state.events); // ローカルにも保持
+          renderAll();
+        }
+      }, (error) => {
+        console.error("Firestore events sync error:", error);
+      });
+
+    // 未定タスクデータのリアルタイム同期
+    unsubscribeTasks = window.db.collection("tasks").doc(String(year))
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          state.monthTasks = doc.data() || {};
+          saveYearTasks(year, state.monthTasks); // ローカルにも保持
+          renderAll();
+        }
+      }, (error) => {
+        console.error("Firestore tasks sync error:", error);
+      });
   }
 
   // --- 初期化 ---
@@ -94,6 +145,13 @@
     setupEventListeners();
     setupMobileMonthTabs();
     renderAll();
+    subscribeFirebase(state.currentYear);
+
+    // 起動直後に現在月を今日ボタンと同様の処理でスクロール
+    const todayInput = document.getElementById(`input-${formatDateKey(state.currentYear, state.activeMobileMonth, new Date().getDate())}`);
+    if (todayInput) {
+      setTimeout(() => todayInput.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+    }
   }
 
   // --- モバイル用月別タブ生成 ---
@@ -176,12 +234,6 @@
     // 2.5 未定・月間予定（タスク）欄
     const monthTasks = createMonthTasksSection(year, month);
     col.appendChild(monthTasks);
-
-    // 3. 予定ヘッダー
-    const eventsHeader = document.createElement('div');
-    eventsHeader.className = 'events-section-header';
-    eventsHeader.textContent = '予定';
-    col.appendChild(eventsHeader);
 
     // 4. 予定リストテーブル
     const eventsTable = createEventsTable(year, month);
@@ -703,6 +755,7 @@
     state.monthTasks = loadYearTasks(newYear);
     state.holidays = JapaneseHolidays.getHolidays(newYear);
     renderAll();
+    subscribeFirebase(newYear);
   }
 
   // --- イベントリスナー設定 ---
