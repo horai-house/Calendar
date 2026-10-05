@@ -1,0 +1,1083 @@
+/* ==========================================================================
+   年間カレンダー (Annual Web Calendar) スタイルシート
+   A4横印刷対応 & Excelライク軽量デザイン
+   ========================================================================== */
+
+:root {
+  --primary-color: #1a73e8;
+  --primary-hover: #1557b0;
+  --bg-color: #f5f6f8;
+  --card-bg: #ffffff;
+  --border-color: #cfd4dc;
+  --border-light: #e4e7eb;
+  --text-main: #202124;
+  --text-muted: #5f6368;
+  --text-disabled: #bdc1c6;
+  
+  /* 曜日・祝日カラー */
+  --sunday-bg: #fce8e6;
+  --sunday-text: #c5221f;
+  --sunday-border: #fad2cf;
+  --saturday-bg: #e8f0fe;
+  --saturday-text: #1967d2;
+  --saturday-border: #d2e3fc;
+  --holiday-badge: #d93025;
+  
+  /* セル・テーブル高さ */
+  --row-height: 23px;
+  --cell-font-size: 11px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", Meiryo, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   ヘッダー・ツールバー
+   -------------------------------------------------------------------------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 8px 16px;
+}
+
+.header-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+/* 年度セレクター */
+.year-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f3f4;
+  border-radius: 8px;
+  padding: 2px 6px;
+}
+
+.year-btn {
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  color: #4b5563;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.year-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.year-display {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0 8px;
+  color: #111827;
+  min-width: 72px;
+  text-align: center;
+}
+
+/* タブ切替（上半期 / 下半期 / 通年） */
+.view-tabs {
+  display: flex;
+  background: #f1f3f4;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tab-btn:hover {
+  color: #111827;
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* モバイル用月切り替えタブ */
+.month-tabs-mobile {
+  display: none;
+  overflow-x: auto;
+  padding: 6px 0;
+  gap: 4px;
+  scrollbar-width: thin;
+}
+
+.month-tab-btn {
+  background: #f1f3f4;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.month-tab-btn.active {
+  background: var(--primary-color);
+  color: #ffffff;
+}
+
+/* アクションボタン群 */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* 印刷調整パネル（トグル） */
+.print-options-bar {
+  background: #eef2ff;
+  border-bottom: 1px solid #c7d2fe;
+  padding: 6px 16px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  display: none; /* 初期は非表示 */
+}
+
+.print-options-bar.show {
+  display: flex;
+}
+
+/* --------------------------------------------------------------------------
+   カレンダー表示コンテナ
+   -------------------------------------------------------------------------- */
+.calendar-wrapper {
+  max-width: 1680px;
+  margin: 12px auto;
+  padding: 0 12px 24px;
+}
+
+/* 半期ごとのページブロック（A4 1ページ分） */
+.half-year-page {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.half-year-title {
+  padding: 8px 14px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 6ヶ月並びのグリッドレイアウト */
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* 1ヶ月分の列カラム */
+.month-column {
+  border-right: 1px solid var(--border-color);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.month-column:last-child {
+  border-right: none;
+}
+
+/* 月ヘッダー */
+.month-header {
+  padding: 5px 6px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* 各月の季節カラーパレット */
+.m-color-1  { background-color: #fce8e6; color: #b31412; } /* 1月 茜・新春 */
+.m-color-2  { background-color: #fde8f0; color: #b81d63; } /* 2月 梅・桜 */
+.m-color-3  { background-color: #e6f4ea; color: #137333; } /* 3月 若草 */
+.m-color-4  { background-color: #e2f6ea; color: #0d652d; } /* 4月 新緑 */
+.m-color-5  { background-color: #e0f2fe; color: #0284c7; } /* 5月 薫風・青空 */
+.m-color-6  { background-color: #e8f0fe; color: #1967d2; } /* 6月 紫陽花・梅雨 */
+.m-color-7  { background-color: #e0f7fa; color: #00838f; } /* 7月 清流 */
+.m-color-8  { background-color: #fff8e1; color: #f57f17; } /* 8月 向日葵・盛夏 */
+.m-color-9  { background-color: #fef3c7; color: #b45309; } /* 9月 稲穂・秋桜 */
+.m-color-10 { background-color: #ffedd5; color: #c2410c; } /* 10月 紅葉 */
+.m-color-11 { background-color: #f3e8ff; color: #7e22ce; } /* 11月 菊・晩秋 */
+.m-color-12 { background-color: #ede9fe; color: #6d28d9; } /* 12月 柊・初雪 */
+
+/* 上部ミニカレンダー */
+.mini-calendar {
+  width: 100%;
+  border-bottom: 1px solid var(--border-color);
+  background: #ffffff;
+  padding: 4px 3px;
+}
+
+.mini-cal-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 10px;
+}
+
+.mini-cal-table th {
+  padding: 2px 0;
+  text-align: center;
+  font-weight: 600;
+  color: #5f6368;
+  font-size: 9.5px;
+}
+
+.mini-cal-table th.sun { color: var(--sunday-text); }
+.mini-cal-table th.sat { color: var(--saturday-text); }
+
+.mini-cal-table td {
+  padding: 1.5px 0;
+  text-align: center;
+  height: 18px;
+  vertical-align: middle;
+  font-size: 9.5px;
+  position: relative;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.1s;
+}
+
+.mini-cal-table td:hover {
+  background: #f1f3f4;
+}
+
+.mini-cal-table td.other-month {
+  color: var(--text-disabled);
+}
+
+.mini-cal-table td.sun { color: var(--sunday-text); }
+.mini-cal-table td.sat { color: var(--saturday-text); }
+.mini-cal-table td.holiday { color: var(--sunday-text); font-weight: 600; }
+.mini-cal-table td.today {
+  font-weight: 700;
+  outline: 1.5px solid var(--primary-color);
+  outline-offset: -1px;
+}
+
+/* 予定ありセルの強調インジケーター */
+.mini-cal-table td.has-event {
+  font-weight: 700;
+  background-color: #fff9c4;
+}
+
+.event-dot {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+}
+
+/* --------------------------------------------------------------------------
+   未定・月間タスク欄 (ミニカレンダーと日別予定表の間)
+   -------------------------------------------------------------------------- */
+.month-tasks-section {
+  border-bottom: 1px solid var(--border-color);
+  background: #fdfdfd;
+  display: flex;
+  flex-direction: column;
+}
+
+.month-tasks-header {
+  background: #f3f4f6;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 10px;
+  font-weight: 700;
+  color: #4b5563;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.month-tasks-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.month-task-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-light);
+  min-height: 22px;
+  padding: 1px 4px;
+  position: relative;
+  background: #ffffff;
+  transition: background 0.15s;
+}
+
+.month-task-row:last-child {
+  border-bottom: none;
+}
+
+.month-task-row:hover {
+  background: #fafafa;
+}
+
+.month-task-bullet {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-right: 4px;
+  user-select: none;
+  line-height: 1;
+}
+
+.month-task-checkbox {
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.month-task-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: var(--cell-font-size);
+  color: #1f2937;
+  padding: 1px 2px;
+  outline: none;
+  font-family: inherit;
+}
+
+.month-task-input:focus {
+  background: #ffffff;
+  outline: 1.5px solid #107c41;
+  outline-offset: -1px;
+  border-radius: 1px;
+}
+
+.month-task-input.completed {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.month-task-del-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 12px;
+  width: 16px;
+  height: 16px;
+  display: none; /* ホバー時に表示 */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.month-task-del-btn:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.month-task-row:hover .month-task-del-btn {
+  display: flex;
+}
+
+/* 印刷時の未定タスク欄調整 */
+@media print {
+  .month-tasks-section {
+    border-bottom: 1px solid #888888;
+  }
+  .month-tasks-header {
+    font-size: 7.5pt;
+    padding: 1px 3px;
+    background: #eef2f6 !important;
+  }
+  .month-task-row {
+    min-height: 14px;
+    padding: 0 2px;
+    border-bottom: 0.5px dashed #cccccc;
+  }
+  .month-task-input {
+    font-size: 7.5pt;
+  }
+  .month-task-checkbox,
+  .month-task-del-btn {
+    display: none !important;
+  }
+  .month-task-row.empty-print-hidden {
+    display: none !important;
+  }
+}
+
+/* 予定テーブル（下段リスト） */
+.events-section-header {
+  background: #eeeeee;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #374151;
+  padding: 3px 0;
+  letter-spacing: 0.1em;
+}
+
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.event-row {
+  border-bottom: 1px solid var(--border-light);
+  height: var(--row-height);
+}
+
+.event-row:last-child {
+  border-bottom: none;
+}
+
+/* 日付セル */
+.col-date {
+  width: 46px;
+  min-width: 46px;
+  padding: 0 4px;
+  font-size: var(--cell-font-size);
+  text-align: center;
+  font-weight: 600;
+  border-right: 1px solid var(--border-light);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* 予定入力セル */
+.col-input {
+  padding: 0 3px;
+  position: relative;
+  background: transparent;
+}
+
+.event-input-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  gap: 2px;
+}
+
+.event-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: var(--cell-font-size);
+  color: #111827;
+  padding: 0 4px;
+  outline: none;
+  font-family: inherit;
+}
+
+/* Excel風のグリーンフォーカス枠 */
+.event-input:focus {
+  background: #ffffff;
+  outline: 2px solid #107c41;
+  outline-offset: -2px;
+  border-radius: 1px;
+}
+
+/* 日付セル内の祝日名表示 */
+.holiday-pill {
+  font-size: 8px;
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 500;
+  margin-right: 4px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* カラーマーカー選択ドロップダウン / ボタン */
+.color-tag-btn {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  flex-shrink: 0;
+  background-color: transparent;
+  display: none; /* 通常時は非表示、行ホバーで表示 */
+}
+
+.event-row:hover .color-tag-btn,
+.color-tag-btn.has-color {
+  display: block;
+}
+
+/* 土・日・祝日のスタイル */
+.event-row.sun {
+  background-color: var(--sunday-bg);
+}
+.event-row.sun .col-date {
+  color: var(--sunday-text);
+}
+
+.event-row.sat {
+  background-color: var(--saturday-bg);
+}
+.event-row.sat .col-date {
+  color: var(--saturday-text);
+}
+
+.event-row.holiday {
+  background-color: var(--sunday-bg);
+}
+.event-row.holiday .col-date {
+  color: var(--sunday-text);
+}
+
+/* 祝日名の小さなバッジ/テキスト */
+.holiday-name-label {
+  font-size: 8.5px;
+  color: var(--holiday-badge);
+  margin-left: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+/* カラータグのバリエーション */
+.tag-blue   { background-color: #2563eb !important; }
+.tag-green  { background-color: #16a34a !important; }
+.tag-orange { background-color: #ea580c !important; }
+.tag-red    { background-color: #dc2626 !important; }
+.tag-purple { background-color: #9333ea !important; }
+
+.event-highlight-blue   { border-left: 3px solid #2563eb; }
+.event-highlight-green  { border-left: 3px solid #16a34a; }
+.event-highlight-orange { border-left: 3px solid #ea580c; }
+.event-highlight-red    { border-left: 3px solid #dc2626; }
+.event-highlight-purple { border-left: 3px solid #9333ea; }
+
+/* カラーセレクターポップアップ */
+.color-palette-popover {
+  position: absolute;
+  z-index: 500;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.color-option {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s;
+}
+
+.color-option:hover {
+  transform: scale(1.2);
+}
+
+/* モーダルダイアログ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-body {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   A4用紙 横向き印刷最適化 (@media print)
+   31日および未定タスクが1ページ内に100%確実に収まるようミリ単位で完全設計
+   -------------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 4mm 5mm 4mm 5mm; /* 余白をコンパクトにして印刷領域を最大化 */
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box !important;
+  }
+
+  html, body {
+    width: 287mm !important;
+    height: 202mm !important;
+    background-color: #ffffff !important;
+    font-size: 8pt;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 印刷時に隠すUI要素 */
+  .app-header,
+  .print-options-bar,
+  .modal-overlay,
+  .color-palette-popover,
+  .color-tag-btn,
+  .year-btn,
+  .view-tabs,
+  .month-tabs-mobile,
+  .month-task-del-btn,
+  .month-task-checkbox {
+    display: none !important;
+  }
+
+  .calendar-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 上半期・下半期の各ページをきっちりA4 1ページずつに分割 */
+  .half-year-page {
+    width: 100% !important;
+    height: 200mm !important;
+    max-height: 200mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    border: 1px solid #777777 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .half-year-page:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* 印刷対象外の半期を非表示 */
+  .half-year-page.print-hidden {
+    display: none !important;
+  }
+
+  /* ページ見出し（上半期/下半期） */
+  .half-year-title {
+    height: 6mm !important;
+    padding: 1mm 3mm !important;
+    font-size: 8.5pt !important;
+    font-weight: bold;
+    border-bottom: 1px solid #777777 !important;
+    background: #f0f0f0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  /* 6ヶ月並びのグリッド */
+  .months-grid {
+    flex: 1 1 auto !important;
+    height: calc(200mm - 6mm) !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    border-collapse: collapse;
+  }
+
+  /* 1ヶ月ごとのカラム */
+  .month-column {
+    display: flex !important;
+    flex-direction: column !important;
+    border-right: 1px solid #777777 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  .month-column:last-child {
+    border-right: none !important;
+  }
+
+  /* 月ヘッダー */
+  .month-header {
+    height: 4.8mm !important;
+    padding: 0 !important;
+    font-size: 8pt !important;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #777777 !important;
+    flex-shrink: 0;
+  }
+
+  /* 上段ミニカレンダー */
+  .mini-calendar {
+    padding: 1mm 1mm 0.5mm 1mm !important;
+    border-bottom: 1px solid #888888 !important;
+    flex-shrink: 0;
+  }
+
+  .mini-cal-table {
+    width: 100% !important;
+  }
+
+  .mini-cal-table th {
+    font-size: 6.5pt !important;
+    padding: 0 !important;
+    line-height: 1.1;
+  }
+
+  .mini-cal-table td {
+    font-size: 6.5pt !important;
+    height: 2.7mm !important;
+    padding: 0 !important;
+    line-height: 1;
+  }
+
+  .event-dot {
+    width: 2.5px !important;
+    height: 2.5px !important;
+    bottom: 0 !important;
+  }
+
+  /* 未定・月間予定セクション */
+  .month-tasks-section {
+    border-bottom: 1px solid #888888 !important;
+    flex-shrink: 0;
+  }
+
+  .month-tasks-header {
+    font-size: 6.5pt !important;
+    padding: 0.5mm 2mm !important;
+    height: 3.5mm !important;
+    background: #f1f3f5 !important;
+    border-bottom: 0.5px solid #cccccc !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .month-task-row {
+    height: 3.8mm !important;
+    min-height: 3.8mm !important;
+    padding: 0 1.5mm !important;
+    border-bottom: 0.5px dashed #cccccc !important;
+  }
+
+  /* 印刷時、入力のない未定タスク空行は非表示にして高さを確保 */
+  .month-task-row.empty-print-hidden {
+    display: none !important;
+  }
+
+  .month-task-input {
+    font-size: 7pt !important;
+    padding: 0 !important;
+    line-height: 1.1;
+  }
+
+  /* 予定ヘッダー */
+  .events-section-header {
+    height: 3.5mm !important;
+    font-size: 7pt !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #777777 !important;
+    background: #eeeeee !important;
+    flex-shrink: 0;
+  }
+
+  /* 予定リストテーブル */
+  .events-table {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    border-collapse: collapse;
+  }
+
+  /* 31日分の各行：1行あたり 4.3mm 〜 4.5mm で31日まで確実に収まる */
+  .event-row {
+    height: 4.4mm !important;
+    min-height: 4.4mm !important;
+    border-bottom: 0.5px solid #999999 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .col-date {
+    width: 32px !important;
+    min-width: 32px !important;
+    font-size: 6.8pt !important;
+    padding: 0 1px !important;
+    border-right: 0.5px solid #999999 !important;
+    line-height: 1;
+  }
+
+  .col-input {
+    padding: 0 1.5px !important;
+  }
+
+  .event-input {
+    font-size: 7pt !important;
+    padding: 0 !important;
+    border: none !important;
+    line-height: 1.1;
+  }
+
+  .holiday-pill {
+    font-size: 5.5pt !important;
+    padding: 0 1.5px !important;
+    margin-right: 2px !important;
+    border-radius: 1px !important;
+  }
+
+  /* 印刷背景色の維持 */
+  .event-row.sun {
+    background-color: #fde8e6 !important;
+  }
+  .event-row.sat {
+    background-color: #e8f0fe !important;
+  }
+  .event-row.holiday {
+    background-color: #fde8e6 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   モバイル対応 (スマートフォン表示)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  .app-header {
+    padding: 8px 10px;
+  }
+  
+  .header-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .view-tabs {
+    display: none; /* スマホでは月別タブに切り替え */
+  }
+
+  .month-tabs-mobile {
+    display: flex;
+  }
+
+  .calendar-wrapper {
+    padding: 0 6px 16px;
+  }
+
+  /* スマホ時は1列（当月のみ）表示 */
+  .months-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .month-column {
+    display: none;
+    border-right: none;
+  }
+
+  .month-column.mobile-active {
+    display: flex;
+  }
+
+  .event-row {
+    height: 32px; /* スマホではタップしやすく少し高さを確保 */
+  }
+
+  .col-date {
+    width: 54px;
+    font-size: 13px;
+  }
+
+  .event-input {
+    font-size: 14px;
+    padding: 0 6px;
+  }
+
+  .color-tag-btn {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+}

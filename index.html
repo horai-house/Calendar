@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>年間カレンダー | A4横印刷対応</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a73e8">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- アプリケーションヘッダー -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-section header-top-row">
+        <h1 class="app-title">
+          <span>📅 年間カレンダー</span>
+          <span class="app-badge">A4横対応</span>
+        </h1>
+
+        <!-- 年度切り替え -->
+        <div class="year-selector">
+          <button id="prev-year-btn" class="year-btn" title="前年へ">◀</button>
+          <div id="year-display" class="year-display">2027年</div>
+          <button id="next-year-btn" class="year-btn" title="次年へ">▶</button>
+        </div>
+
+        <button id="today-btn" class="btn" style="padding: 4px 8px; font-size: 11px;">今日</button>
+      </div>
+
+      <!-- 表示タブ（上半期 / 下半期 / 通年） -->
+      <div class="view-tabs">
+        <button class="tab-btn active" data-period="first-half">上半期 (1〜6月)</button>
+        <button class="tab-btn" data-period="second-half">下半期 (7〜12月)</button>
+        <button class="tab-btn" data-period="full-year">通年 (1〜12月)</button>
+      </div>
+
+      <!-- 操作ボタン群 -->
+      <div class="action-buttons">
+        <button id="print-btn" class="btn btn-primary" title="A4横向きで印刷します">
+          🖨️ A4横 印刷
+        </button>
+        <button id="backup-btn" class="btn" title="データの保存・復元">
+          💾 保存/復元
+        </button>
+        <button id="options-toggle-btn" class="btn" title="印刷レイアウトの微調整">
+          ⚙️ 調整
+        </button>
+      </div>
+    </div>
+
+    <!-- モバイル用月切り替えタブ（画面幅768px以下で自動表示） -->
+    <div class="month-tabs-mobile" id="month-tabs-mobile">
+      <!-- 1月〜12月ボタンが動的生成される -->
+    </div>
+  </header>
+
+  <!-- 印刷微調整バー（設定トグル） -->
+  <div id="print-options-bar" class="print-options-bar">
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <strong>印刷対象:</strong>
+        <label style="margin-left: 6px;"><input type="radio" name="print-target" value="current" checked> 現在の期のみ(1枚)</label>
+        <label style="margin-left: 8px;"><input type="radio" name="print-target" value="both"> 通年(全2枚)</label>
+      </div>
+      <div>
+        <label>
+          行の高さ調整:
+          <input type="range" id="row-height-range" min="18" max="34" value="23" style="vertical-align: middle; width: 100px;">
+          <span id="row-height-val">23px</span>
+        </label>
+      </div>
+      <div>
+        <label>
+          フォントサイズ:
+          <input type="range" id="font-size-range" min="9" max="14" value="11" style="vertical-align: middle; width: 80px;">
+          <span id="font-size-val">11px</span>
+        </label>
+      </div>
+    </div>
+    <button id="reset-print-opt-btn" class="btn" style="padding: 2px 8px; font-size: 11px;">標準に戻す</button>
+  </div>
+
+  <!-- カレンダーメイン領域 -->
+  <main class="calendar-wrapper" id="calendar-wrapper">
+    <!-- 上半期 (1〜6月) -->
+    <section class="half-year-page" id="page-first-half">
+      <div class="half-year-title">
+        <span id="first-half-heading">2027年 上半期 (1月 〜 6月)</span>
+        <span style="font-size: 11px; color: var(--text-muted);">A4横 1ページ目</span>
+      </div>
+      <div class="months-grid" id="grid-first-half">
+        <!-- 1月〜6月のカラムが動的生成される -->
+      </div>
+    </section>
+
+    <!-- 下半期 (7〜12月) -->
+    <section class="half-year-page" id="page-second-half">
+      <div class="half-year-title">
+        <span id="second-half-heading">2027年 下半期 (7月 〜 12月)</span>
+        <span style="font-size: 11px; color: var(--text-muted);">A4横 2ページ目</span>
+      </div>
+      <div class="months-grid" id="grid-second-half">
+        <!-- 7月〜12月のカラムが動的生成される -->
+      </div>
+    </section>
+  </main>
+
+  <!-- カラー選択ポップオーバー（フローティング） -->
+  <div id="color-popover" class="color-palette-popover" style="display: none;">
+    <div class="color-option" data-color="" style="background: #ffffff; border: 1px dashed #999;" title="なし"></div>
+    <div class="color-option tag-blue" data-color="blue" title="青（仕事・重要）"></div>
+    <div class="color-option tag-green" data-color="green" title="緑（プライベート・外出）"></div>
+    <div class="color-option tag-orange" data-color="orange" title="橙（会議・打合せ）"></div>
+    <div class="color-option tag-red" data-color="red" title="赤（緊急・締切）"></div>
+    <div class="color-option tag-purple" data-color="purple" title="紫（記念日・イベント）"></div>
+  </div>
+
+  <!-- データ保存・復元モーダル -->
+  <div id="backup-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">💾 データのバックアップと復元</h3>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px; color: #4b5563;">
+          入力した予定はブラウザ内に年度ごとに自動保存されています。<br>
+          別のPCやスマホへ移行したい場合、またはバックアップを取りたい場合は以下をご利用ください。
+        </p>
+
+        <div style="margin-bottom: 14px; padding: 10px; background: #f9fafb; border-radius: 6px; border: 1px solid var(--border-light);">
+          <strong>エクスポート（書き出し）:</strong>
+          <div style="margin-top: 6px; display: flex; gap: 8px;">
+            <button id="export-json-btn" class="btn">JSONでバックアップ保存</button>
+            <button id="export-csv-btn" class="btn">CSV形式でダウンロード</button>
+          </div>
+        </div>
+
+        <div style="padding: 10px; background: #f9fafb; border-radius: 6px; border: 1px solid var(--border-light);">
+          <strong>インポート（読み込み）:</strong>
+          <div style="margin-top: 6px;">
+            <input type="file" id="import-file-input" accept=".json" style="font-size: 12px;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel-btn">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- スクリプト読込 -->
+  <script src="holidays.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
