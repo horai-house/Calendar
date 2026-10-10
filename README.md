@@ -11,7 +11,8 @@ A4横印刷対応・スマホ対応・日本の祝日自動判定・予定の年
 年間カレンダー/
 ├── index.html       # メインHTML
 ├── style.css        # デザイン・印刷スタイル
-├── app.js           # カレンダー描画・データ管理ロジック
+├── app.js           # カレンダー描画・データ管理・Firebaseリアルタイム同期ロジック
+├── firebase-config.js # Firebase APIキー・接続設定ファイル
 ├── holidays.js      # 日本の祝日・振替休日 計算モジュール
 ├── manifest.json    # スマホでホーム画面に追加（PWA）用
 ├── カレンダーを開く.bat  # Windowsでダブルクリックして開く
@@ -44,10 +45,11 @@ A4横印刷対応・スマホ対応・日本の祝日自動判定・予定の年
 ### ステップ 2: ファイルをアップロードする
 
 1. リポジトリ作成直後の画面で「**uploading an existing file**」リンクをクリックします。
-2. 以下の5ファイルをまとめてドラッグ＆ドロップします：
+2. 以下の6ファイルをまとめてドラッグ＆ドロップします：
    - `index.html`
    - `style.css`
    - `app.js`
+   - `firebase-config.js`
    - `holidays.js`
    - `manifest.json`
 3. 画面下部の「**Commit changes**」ボタンをクリックして保存します。
@@ -81,6 +83,53 @@ https://（ユーザー名またはhorai-house）.github.io/annual-calendar/
 
 ---
 
+## 🔥 Firebase連携（スマホとPCのリアルタイム同期）
+
+Firebase (Cloud Firestore) を使用することで、**スマホで入力した予定や未定タスクがPCや他端末へリアルタイムに自動同期**されます。
+
+### 1. Firebase APIキー・接続設定情報 (`firebase-config.js`)
+
+プロジェクトの設定情報（APIキー等）は `firebase-config.js` 内に記述されています。
+
+```javascript
+const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "annualcalendar-7ec4c.firebaseapp.com",
+  projectId: "annualcalendar-7ec4c",
+  storageBucket: "annualcalendar-7ec4c.firebasestorage.app",
+  messagingSenderId: "183493934695",
+  appId: "1:183493934695:web:3e2258c7ff19d163d01ec2",
+  measurementId: "G-3ZZQ1W7FSZ"
+};
+```
+
+### 2. APIキー・設定情報の確認場所（Firebase Console）
+
+APIキーや設定情報を再確認・変更する場合は、以下の手順で取得できます。
+
+1. [Firebase Console](https://console.firebase.google.com/) にアクセスします。
+2. 対象のプロジェクト（例: `annualcalendar-7ec4c`）を選択します。
+3. 画面左上の ⚙️（歯車マーク）をクリックし、「**プロジェクトの設定**」を開きます。
+4. 「**全般**」タブの一番下にある「**マイアプリ**」セクションを表示します。
+5. 「**SDK の設定と構成**」で「**構成**」を選択すると、上記コードが表示されます。
+
+### 3. セキュリティルール設定（Cloud Firestore）
+
+Firebase Consoleの **「Cloud Firestore」 > 「ルール」** タブで、以下のルールが適用されているか確認してください。
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+---
+
 ## 🔄 ファイルを更新・修正した後の反映手順
 
 コードやデザインを修正した場合は以下の手順で更新します。
@@ -95,8 +144,8 @@ https://（ユーザー名またはhorai-house）.github.io/annual-calendar/
 
 ## 💾 データ（予定）のバックアップと復元
 
-カレンダーに入力した予定はブラウザ（LocalStorage）に年度ごと自動保存されます。  
-別のPCやスマホへデータを移行したい場合は以下の手順を使います。
+カレンダーに入力した予定はローカル（LocalStorage）およびFirebase（Cloud Firestore）に自動保存されます。  
+バックアップファイルとして保存したい場合は以下の手順を使います。
 
 ### バックアップ（書き出し）
 
@@ -125,6 +174,7 @@ https://（ユーザー名またはhorai-house）.github.io/annual-calendar/
 
 | 機能 | 内容 |
 |------|------|
+| リアルタイム自動同期 | Firebase Firestore連携により複数端末で即時同期 |
 | 年度切り替え | 左右の ◀ ▶ ボタンで切り替え。過去のデータも記憶 |
 | 祝日自動判定 | 春分・秋分・振替休日・国民の休日まで対応 |
 | カラーラベル | 予定に色（青・緑・橙・赤・紫）を設定。上部カレンダーに反映 |
@@ -135,16 +185,4 @@ https://（ユーザー名またはhorai-house）.github.io/annual-calendar/
 | A4横印刷 | 1〜6月・7〜12月を各1ページに最適化。31日まで確実に収まる |
 | バックアップ | JSON・CSV形式でエクスポート/インポート |
 
----
-
-## 🚀 今後の拡張案（Firebase連携によるマルチデバイス同期）
-
-現在はスマホ・PCそれぞれのブラウザ（LocalStorage）に予定が保存される仕組みですが、将来的に「**スマホで登録した予定をPCや他端末へ自動同期**」したい場合は、**Firebase Realtime Database (Firestore)** を連携する拡張が可能です。
-
-### 連携の概要
-1. Firebaseでプロジェクトを作成し、APIキーを取得
-2. `app.js` にFirebase SDKを追加
-3. LocalStorageでの保存処理を、Firebaseへのリアルタイム同期処理に変更
-
-※ 連携を行わなくても、現在のバックアップ（JSON出力/復元）機能で端末間のデータ移行は可能です。
 

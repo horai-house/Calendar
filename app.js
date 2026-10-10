@@ -117,7 +117,11 @@
         if (doc.exists) {
           state.events = doc.data() || {};
           saveYearEvents(year, state.events); // ローカルにも保持
-          renderAll();
+          // 入力中の場合はrenderAllをスキップ（1文字しか入力できないバグ対策）
+          const activeEl = document.activeElement;
+          if (!activeEl || !activeEl.classList.contains('event-input')) {
+            renderAll();
+          }
         }
       }, (error) => {
         console.error("Firestore events sync error:", error);
@@ -129,7 +133,11 @@
         if (doc.exists) {
           state.monthTasks = doc.data() || {};
           saveYearTasks(year, state.monthTasks); // ローカルにも保持
-          renderAll();
+          // 入力中の場合はrenderAllをスキップ（1文字しか入力できないバグ対策）
+          const activeEl = document.activeElement;
+          if (!activeEl || (!activeEl.classList.contains('event-input') && !activeEl.classList.contains('month-task-input'))) {
+            renderAll();
+          }
         }
       }, (error) => {
         console.error("Firestore tasks sync error:", error);
