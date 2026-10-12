@@ -151,6 +151,10 @@
 
     setupEventListeners();
     setupMobileMonthTabs();
+    
+    // 現在の月（1〜6月なら上半期、7〜12月なら下半期）に切り替え同期
+    switchPeriod(state.currentPeriod, true);
+
     renderAll();
     subscribeFirebase(state.currentYear);
 
@@ -178,6 +182,7 @@
       const btn = document.createElement('button');
       btn.className = `month-tab-btn ${m === state.activeMobileMonth ? 'active' : ''}`;
       btn.textContent = `${m}月`;
+      btn.id = `month-tab-btn-${m}`;
       btn.dataset.month = m;
       btn.addEventListener('click', () => {
         state.activeMobileMonth = m;
@@ -186,14 +191,22 @@
         btn.classList.add('active');
         // 半期のタブ表示状態も同期
         if (m <= 6) {
-          switchPeriod('first-half', false);
+          switchPeriod('first-half', true);
         } else {
-          switchPeriod('second-half', false);
+          switchPeriod('second-half', true);
         }
         updateMobileColumnVisibility();
       });
       monthTabsMobile.appendChild(btn);
     }
+
+    // スマホ表示時に選択中の月タブ（10月など）が見えるようにスクロール
+    setTimeout(() => {
+      const activeBtn = document.getElementById(`month-tab-btn-${state.activeMobileMonth}`);
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }, 150);
   }
 
   function updateMobileColumnVisibility() {
@@ -810,22 +823,30 @@
       const val = e.target.value;
       rowHeightVal.textContent = `${val}px`;
       document.documentElement.style.setProperty('--row-height', `${val}px`);
+      // 印刷用の基準行高(4.4mm = 23px)に対する比率で印刷時の高さも調整
+      const printRowHeight = (4.4 * (val / 23)).toFixed(2);
+      document.documentElement.style.setProperty('--print-row-height', `${printRowHeight}mm`);
     });
 
     fontSizeRange.addEventListener('input', (e) => {
       const val = e.target.value;
       fontSizeVal.textContent = `${val}px`;
       document.documentElement.style.setProperty('--cell-font-size', `${val}px`);
+      // 印刷用の基準フォント(7pt = 11px)に対する比率で印刷フォントサイズも反映
+      const printFontSize = (7 * (val / 11)).toFixed(2);
+      document.documentElement.style.setProperty('--print-cell-font-size', `${printFontSize}pt`);
     });
 
     resetPrintOptBtn.addEventListener('click', () => {
       rowHeightRange.value = 23;
       rowHeightVal.textContent = '23px';
       document.documentElement.style.setProperty('--row-height', '23px');
+      document.documentElement.style.setProperty('--print-row-height', '4.4mm');
 
       fontSizeRange.value = 11;
       fontSizeVal.textContent = '11px';
       document.documentElement.style.setProperty('--cell-font-size', '11px');
+      document.documentElement.style.setProperty('--print-cell-font-size', '7pt');
     });
 
     // 印刷ボタン

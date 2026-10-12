@@ -26,6 +26,8 @@
   /* セル・テーブル高さ */
   --row-height: 23px;
   --cell-font-size: 11px;
+  --print-row-height: 4.4mm;
+  --print-cell-font-size: 7pt;
 }
 
 * {
@@ -969,8 +971,8 @@ body {
 
   /* 31日分の各行：1行あたり 4.3mm 〜 4.5mm で31日まで確実に収まる */
   .event-row {
-    height: 4.4mm !important;
-    min-height: 4.4mm !important;
+    height: var(--print-row-height, 4.4mm) !important;
+    min-height: var(--print-row-height, 4.4mm) !important;
     border-bottom: 0.5px solid #999999 !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
@@ -979,7 +981,7 @@ body {
   .col-date {
     width: 32px !important;
     min-width: 32px !important;
-    font-size: 6.8pt !important;
+    font-size: calc(var(--print-cell-font-size, 7pt) * 0.95) !important;
     padding: 0 1px !important;
     border-right: 0.5px solid #999999 !important;
     line-height: 1;
@@ -990,14 +992,14 @@ body {
   }
 
   .event-input {
-    font-size: 7pt !important;
+    font-size: var(--print-cell-font-size, 7pt) !important;
     padding: 0 !important;
     border: none !important;
     line-height: 1.1;
   }
 
   .holiday-pill {
-    font-size: 5.5pt !important;
+    font-size: calc(var(--print-cell-font-size, 7pt) * 0.8) !important;
     padding: 0 1.5px !important;
     margin-right: 2px !important;
     border-radius: 1px !important;
