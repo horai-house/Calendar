@@ -25,8 +25,6 @@
   const nextYearBtn = document.getElementById('next-year-btn');
   const todayBtn = document.getElementById('today-btn');
   const printBtn = document.getElementById('print-btn');
-  const optionsToggleBtn = document.getElementById('options-toggle-btn');
-  const printOptionsBar = document.getElementById('print-options-bar');
   const tabBtns = document.querySelectorAll('.tab-btn');
   const monthTabsMobile = document.getElementById('month-tabs-mobile');
   const pageFirstHalf = document.getElementById('page-first-half');
@@ -36,18 +34,6 @@
   const firstHalfHeading = document.getElementById('first-half-heading');
   const secondHalfHeading = document.getElementById('second-half-heading');
   const colorPopover = document.getElementById('color-popover');
-  const backupBtn = document.getElementById('backup-btn');
-  const backupModal = document.getElementById('backup-modal');
-  const modalCloseBtn = document.getElementById('modal-close-btn');
-  const modalCancelBtn = document.getElementById('modal-cancel-btn');
-  const exportJsonBtn = document.getElementById('export-json-btn');
-  const exportCsvBtn = document.getElementById('export-csv-btn');
-  const importFileInput = document.getElementById('import-file-input');
-  const rowHeightRange = document.getElementById('row-height-range');
-  const rowHeightVal = document.getElementById('row-height-val');
-  const fontSizeRange = document.getElementById('font-size-range');
-  const fontSizeVal = document.getElementById('font-size-val');
-  const resetPrintOptBtn = document.getElementById('reset-print-opt-btn');
 
   // Firebase参照の取得
   let unsubscribeEvents = null;
@@ -813,42 +799,6 @@
       });
     });
 
-    // 印刷調整パネルトグル
-    optionsToggleBtn.addEventListener('click', () => {
-      printOptionsBar.classList.toggle('show');
-    });
-
-    // 印刷微調整コントロール
-    rowHeightRange.addEventListener('input', (e) => {
-      const val = e.target.value;
-      rowHeightVal.textContent = `${val}px`;
-      document.documentElement.style.setProperty('--row-height', `${val}px`);
-      // 印刷用の基準行高(4.4mm = 23px)に対する比率で印刷時の高さも調整
-      const printRowHeight = (4.4 * (val / 23)).toFixed(2);
-      document.documentElement.style.setProperty('--print-row-height', `${printRowHeight}mm`);
-    });
-
-    fontSizeRange.addEventListener('input', (e) => {
-      const val = e.target.value;
-      fontSizeVal.textContent = `${val}px`;
-      document.documentElement.style.setProperty('--cell-font-size', `${val}px`);
-      // 印刷用の基準フォント(7pt = 11px)に対する比率で印刷フォントサイズも反映
-      const printFontSize = (7 * (val / 11)).toFixed(2);
-      document.documentElement.style.setProperty('--print-cell-font-size', `${printFontSize}pt`);
-    });
-
-    resetPrintOptBtn.addEventListener('click', () => {
-      rowHeightRange.value = 23;
-      rowHeightVal.textContent = '23px';
-      document.documentElement.style.setProperty('--row-height', '23px');
-      document.documentElement.style.setProperty('--print-row-height', '4.4mm');
-
-      fontSizeRange.value = 11;
-      fontSizeVal.textContent = '11px';
-      document.documentElement.style.setProperty('--cell-font-size', '11px');
-      document.documentElement.style.setProperty('--print-cell-font-size', '7pt');
-    });
-
     // 印刷ボタン
     printBtn.addEventListener('click', () => {
       const printTarget = document.querySelector('input[name="print-target"]:checked').value;
@@ -873,71 +823,6 @@
       if (!colorPopover.contains(e.target) && !e.target.classList.contains('color-tag-btn')) {
         colorPopover.style.display = 'none';
       }
-    });
-
-    // バックアップモーダル制御
-    backupBtn.addEventListener('click', () => backupModal.classList.add('open'));
-    modalCloseBtn.addEventListener('click', () => backupModal.classList.remove('open'));
-    modalCancelBtn.addEventListener('click', () => backupModal.classList.remove('open'));
-    backupModal.addEventListener('click', (e) => {
-      if (e.target === backupModal) backupModal.classList.remove('open');
-    });
-
-    // JSONエクスポート
-    exportJsonBtn.addEventListener('click', () => {
-      const allData = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith(STORAGE_KEY_PREFIX) || key.startsWith(STORAGE_TASKS_PREFIX)) {
-          allData[key] = JSON.parse(localStorage.getItem(key));
-        }
-      }
-      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-      downloadFile(blob, `calendar_backup_${state.currentYear}.json`);
-    });
-
-    // CSVエクスポート
-    exportCsvBtn.addEventListener('click', () => {
-      let csvContent = '\uFEFF日付,曜日,祝日,予定,カラー\n';
-      for (let m = 1; m <= 12; m++) {
-        const days = new Date(state.currentYear, m, 0).getDate();
-        for (let d = 1; d <= days; d++) {
-          const dateStr = formatDateKey(state.currentYear, m, d);
-          const w = WEEKDAYS[new Date(state.currentYear, m - 1, d).getDay()];
-          const holiday = state.holidays[dateStr] || '';
-          const evt = state.events[dateStr] || { text: '', color: '' };
-          const safeText = `"${(evt.text || '').replace(/"/g, '""')}"`;
-          csvContent += `${dateStr},${w},${holiday},${safeText},${evt.color || ''}\n`;
-        }
-      }
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      downloadFile(blob, `calendar_${state.currentYear}.csv`);
-    });
-
-    // JSONインポート
-    importFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const data = JSON.parse(event.target.result);
-          Object.keys(data).forEach(key => {
-            if (key.startsWith(STORAGE_KEY_PREFIX) || key.startsWith(STORAGE_TASKS_PREFIX)) {
-              localStorage.setItem(key, JSON.stringify(data[key]));
-            }
-          });
-          alert('データを正常に復元しました！');
-          backupModal.classList.remove('open');
-          state.events = loadYearEvents(state.currentYear);
-          state.monthTasks = loadYearTasks(state.currentYear);
-          renderAll();
-        } catch (err) {
-          alert('ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。');
-        }
-      };
-      reader.readAsText(file);
     });
   }
 
