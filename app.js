@@ -12,6 +12,7 @@
     monthTasks: {}, // { "1": [ { text: "...", done: false } ], ... }
     holidays: {},
     activeColorTargetDate: null,
+    isInputFocused: false, // 入力中フラグ（Firebase同期時のrenderAll抑制用）
   };
 
   const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
@@ -117,9 +118,8 @@
         if (doc.exists) {
           state.events = doc.data() || {};
           saveYearEvents(year, state.events); // ローカルにも保持
-          // 入力中の場合はrenderAllをスキップ（1文字しか入力できないバグ対策）
-          const activeEl = document.activeElement;
-          if (!activeEl || !activeEl.classList.contains('event-input')) {
+          // 入力フォーカス中はrenderAllをスキップ（スマホ含む1文字バグ対策）
+          if (!state.isInputFocused) {
             renderAll();
           }
         }
@@ -133,9 +133,8 @@
         if (doc.exists) {
           state.monthTasks = doc.data() || {};
           saveYearTasks(year, state.monthTasks); // ローカルにも保持
-          // 入力中の場合はrenderAllをスキップ（1文字しか入力できないバグ対策）
-          const activeEl = document.activeElement;
-          if (!activeEl || (!activeEl.classList.contains('event-input') && !activeEl.classList.contains('month-task-input'))) {
+          // 入力フォーカス中はrenderAllをスキップ（スマホ含む1文字バグ対策）
+          if (!state.isInputFocused) {
             renderAll();
           }
         }
@@ -155,11 +154,21 @@
     renderAll();
     subscribeFirebase(state.currentYear);
 
-    // 起動直後に現在月を今日ボタンと同様の処理でスクロール
-    const todayInput = document.getElementById(`input-${formatDateKey(state.currentYear, state.activeMobileMonth, new Date().getDate())}`);
-    if (todayInput) {
-      setTimeout(() => todayInput.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
-    }
+    // 起動直後に今日の行をスクロールして中央表示（スマホ対応のため少し遅延）
+    scrollToToday();
+  }
+
+  // --- 今日の行を中央にスクロール ---
+  function scrollToToday() {
+    const today = new Date();
+    const dateKey = formatDateKey(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    // レイアウト完了後に実行するため setTimeout を使用
+    setTimeout(() => {
+      const todayRow = document.getElementById(`row-${dateKey}`);
+      if (todayRow) {
+        todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
   }
 
   // --- モバイル用月別タブ生成 ---
@@ -314,24 +323,22 @@
         input.placeholder = index === 0 && currentTasks.length === 1 ? '未定予定・タスク...' : '';
         input.dataset.index = index;
 
+        // フォーカス状態のトラッキング（Firebase同期時のrenderAll抑制用）
+        input.addEventListener('focus', () => { state.isInputFocused = true; });
+        input.addEventListener('blur', () => { state.isInputFocused = false; });
+
         // 入力時の処理（末尾入力で次行を自動追加）
         input.addEventListener('input', (e) => {
           task.text = e.target.value;
           if (task.text.trim() !== '') {
             row.classList.remove('empty-print-hidden');
-            // もし最後の行に入力したら、自動で次の空行を1行追加
+            // もし最後の行に入力したら、DOM全破棄せず末尾に空行を追記（スマホ対応）
             if (index === currentTasks.length - 1) {
               currentTasks.push({ text: '', done: false });
               saveYearTasks(year, state.monthTasks);
-              renderTasks();
-              // フォーカスを現在の行に戻す
-              const inputs = listContainer.querySelectorAll('.month-task-input');
-              if (inputs[index]) {
-                inputs[index].focus();
-                // カーソルを末尾に
-                const len = inputs[index].value.length;
-                inputs[index].setSelectionRange(len, len);
-              }
+              // renderTasks()でDOMを全破棄するとスマホでキーボードが閉じるため
+              // 代わりに新しい空行のみDOMに追記する
+              appendNewTaskRow(currentTasks.length - 1, currentTasks, listContainer, year, renderTasks);
               return;
             }
           } else {
@@ -571,6 +578,10 @@
         e.stopPropagation();
         openColorPopover(e.currentTarget, dateStr);
       });
+
+      // フォーカス状態のトラッキング（Firebase同期時のrenderAll抑制用）
+      input.addEventListener('focus', () => { state.isInputFocused = true; });
+      input.addEventListener('blur', () => { state.isInputFocused = false; });
 
       // 入力時のリアルタイム保存＆ミニカレンダー連動
       input.addEventListener('input', (e) => {

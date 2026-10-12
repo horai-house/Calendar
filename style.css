@@ -1033,6 +1033,49 @@ body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    gap: 6px;
+  }
+
+  .app-title {
+    font-size: 15px;
+    white-space: nowrap;
+    flex-shrink: 1;
+    gap: 4px;
+  }
+
+  .app-badge {
+    display: none; /* スマホ画面の横幅を確保するためバッジを非表示 */
+  }
+
+  .year-selector {
+    padding: 2px 4px;
+    gap: 2px;
+  }
+
+  .year-display {
+    font-size: 14px;
+    min-width: 58px;
+    padding: 0 4px;
+  }
+
+  .year-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .action-buttons .btn {
+    justify-content: center;
+    padding: 6px 4px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .view-tabs {
